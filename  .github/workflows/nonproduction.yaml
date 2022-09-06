@@ -1,4 +1,4 @@
-name: Deploy feature branches to nonproduction
+name: Deploy feature branches to nonproduction bucket
 
 on:
   push:
@@ -6,28 +6,27 @@ on:
       - feature*
 
 jobs:
+
   build:
     runs-on: ubuntu-latest
     env:
-      BUCKET_NAME: <Nonproduction bucket name here>
+      BUCKET_NAME: cfst-3457-28c4f3368ee7fce4d3e0b1f5a-nonprodbucket-1ggpluavkx3v3
     steps:
-      - name: Checkout code
+      - name: Check out code
         uses: actions/checkout@v2
-      - name: Configure AWS cli
+      - name: configure aws cli
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-      - name: Use Node.js
+      - name: set up node.js
         uses: actions/setup-node@v2
         with:
           node-version: 14
-      - name: Build
+      - name: build site
         run: |
           npm ci
           npm run build
-      - name: Deploy bundle to bucket
-        run: |
-            echo 'copying files to s3 bucket'
-            aws s3 cp public s3://${{ env.BUCKET_NAME }}/ --recursive --acl public-read
+      - name: deploy files to bucket
+        run: aws s3 cp public s3://${{ env.BUCKET_NAME }} --recursive --acl public-read
